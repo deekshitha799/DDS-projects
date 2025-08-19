@@ -1,0 +1,118 @@
+class Station:
+    def __init__(self, name):
+        self.name = name
+        self.next = None
+        self.prev = None
+
+
+class TrainRoute:
+    def __init__(self):
+        self.head = None
+        self.current = None
+        self.circular = False
+
+    def add_station(self, name):
+        new_station = Station(name)
+        if self.head is None:
+            self.head = new_station
+            self.current = new_station
+        else:
+            temp = self.head
+            while temp.next:
+                temp = temp.next
+            temp.next = new_station
+            new_station.prev = temp
+            if self.circular:
+                new_station.next = self.head
+                self.head.prev = new_station
+        print(f"✅ Station {name} added.")
+
+    def show_route(self):
+        if self.head is None:
+            print("⚠️ No stations in the route.")
+            return
+        stations = []
+        temp = self.head
+        while True:
+            stations.append(temp.name)
+            temp = temp.next
+            if temp is None or (self.circular and temp == self.head):
+                break
+        print("📋 Current Route:", " <-> ".join(stations))
+
+    def move_forward(self):
+        if not self.current:
+            print("⚠️ No stations available.")
+            return
+        if self.current.next:
+            self.current = self.current.next
+        elif self.circular:
+            self.current = self.head
+        else:
+            print("🚧 End of the route reached.")
+            return
+        print(f"🚆 Moving forward... Now at {self.current.name}")
+
+    def move_backward(self):
+        if not self.current:
+            print("⚠️ No stations available.")
+            return
+        if self.current.prev:
+            self.current = self.current.prev
+        elif self.circular:
+            temp = self.head
+            while temp.next:
+                temp = temp.next
+            self.current = temp
+        else:
+            print("🚧 Start of the route reached.")
+            return
+        print(f"⏪ Moving backward... Now at {self.current.name}")
+
+    def enable_circular(self):
+        if self.head is None:
+            print("⚠️ No stations to loop.")
+            return
+        temp = self.head
+        while temp.next:
+            temp = temp.next
+        temp.next = self.head
+        self.head.prev = temp
+        self.circular = True
+        print("🔄 Circular route enabled!")
+
+
+# ----------------- Main Menu -----------------
+
+def main():
+    route = TrainRoute()
+    while True:
+        print("\n===== Virtual Train Route Planner =====")
+        print("1. Add Station")
+        print("2. Show Route")
+        print("3. Move Forward")
+        print("4. Move Backward")
+        print("5. Enable Circular Route")
+        print("6. Exit")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            name = input("Enter station name: ")
+            route.add_station(name)
+        elif choice == "2":
+            route.show_route()
+        elif choice == "3":
+            route.move_forward()
+        elif choice == "4":
+            route.move_backward()
+        elif choice == "5":
+            route.enable_circular()
+        elif choice == "6":
+            print("👋 Exiting system...")
+            break
+        else:
+            print("⚠️ Invalid choice! Please enter 1-6.")
+
+
+if __name__ == "__main__":
+    main()
