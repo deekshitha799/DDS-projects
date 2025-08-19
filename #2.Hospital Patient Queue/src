@@ -1,0 +1,73 @@
+import heapq
+from collections import deque
+import time
+
+class HospitalQueue:
+    def __init__(self):
+        self.emergency_queue = []   # Priority queue (min-heap by arrival order)
+        self.regular_queue = deque()  # Normal queue
+        self.avg_consult_time = 10   # minutes per patient
+        self.counter = 0  # for priority ordering
+
+    def add_patient(self, name, p_type):
+        self.counter += 1
+        timestamp = time.strftime("%I:%M:%S %p")
+        if p_type.lower() == "e":
+            heapq.heappush(self.emergency_queue, (self.counter, {"name": name, "type": "Emergency", "time": timestamp}))
+            print(f"⚡ Emergency patient {name} added with high priority!")
+        else:
+            self.regular_queue.append({"name": name, "type": "Regular", "time": timestamp})
+            print(f"✅ Added regular patient: {name}")
+
+    def show_queue(self):
+        print("\n📋 Current Queue:")
+        wait_time = 0
+        # Emergency patients first
+        for _, patient in sorted(self.emergency_queue):
+            print(f"{patient['name']} ({patient['type']}) - Wait: {wait_time} min")
+            wait_time += self.avg_consult_time
+        # Then regular patients
+        for patient in self.regular_queue:
+            print(f"{patient['name']} ({patient['type']}) - Wait: {wait_time} min")
+            wait_time += self.avg_consult_time
+        if not self.emergency_queue and not self.regular_queue:
+            print("No patients in the queue.")
+
+    def serve_next(self):
+        if self.emergency_queue:
+            _, patient = heapq.heappop(self.emergency_queue)
+        elif self.regular_queue:
+            patient = self.regular_queue.popleft()
+        else:
+            print("⚠️ No patients to serve.")
+            return
+        print(f"👨‍⚕️ Now serving {patient['name']} ({patient['type']}) - Arrived at {patient['time']}")
+
+# ------------------ Main Menu ------------------
+
+def main():
+    hq = HospitalQueue()
+    while True:
+        print("\n===== Hospital Patient Queue System =====")
+        print("1. Add Patient")
+        print("2. Show Queue")
+        print("3. Serve Next Patient")
+        print("4. Exit")
+        choice = input("Enter your choice (1-4): ")
+
+        if choice == "1":
+            name = input("Enter patient name: ")
+            p_type = input("Enter type (E for Emergency, R for Regular): ")
+            hq.add_patient(name, p_type)
+        elif choice == "2":
+            hq.show_queue()
+        elif choice == "3":
+            hq.serve_next()
+        elif choice == "4":
+            print("👋 Exiting system...")
+            break
+        else:
+            print("⚠️ Invalid choice! Please enter 1-4.")
+
+if __name__ == "__main__":
+    main()
